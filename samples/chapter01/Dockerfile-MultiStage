@@ -1,3 +1,4 @@
+# ビルド後にalpineにコピーするので軽量
 # Stage 1のコンテナ（アプリケーションをビルド）
 FROM golang:1.10.1-alpine3.7 as builder
 COPY ./main.go ./
