@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: wp-statefulset
+spec:
+  serviceName: wp-statefulset
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:5.7
+        ports:
+          - containerPort: 3306
+        env:
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: wp-configmap
+              key: mysql-database
+        - name: MYSQL_USER
+          valueFrom:
+            configMapKeyRef:
+              name: wp-configmap
+              key: wp-db-user
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: wp-db-auth
+              key: password
+        - name: MYSQL_RANDOM_ROOT_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: wp-configmap
+              key: mysql-random-root-password
+        volumeMounts:
+        - name: data-volume
+          mountPath: /var/lib/mysql
+      initContainers:
+      - name: alpine
+        image: alpine
+        command: ["rm", "-rf", "/var/lib/mysql/lost+found"]
+        volumeMounts:
+        - name: data-volume
+          mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+  - metadata:
+      name: data-volume
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
