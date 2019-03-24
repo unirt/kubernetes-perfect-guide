@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-config
+data:
+  fluent.conf: |
+    <source>
+      @type tail
+      path /logs/tick.log
+      tag tick
+      <parse>
+        @type none
+      </parse>
+    </source>
+    <filter tick>
+      @type record_transformer
+      enable_ruby true
+      <record>
+        message ${require 'time'; Time.iso8601(record["message"].to_s).strftime("%Y年%m月%d日 %H時%M分%S秒")}
+      </record>
+    </filter>
+    <match tick>
+      @type stdout
+    </match>
+    

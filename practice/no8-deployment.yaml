@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tick-app
+spec:
+  selector:
+    matchLabels:
+      app: tick-app
+  template:
+    metadata:
+      labels:
+        app: tick-app
+    spec:
+      containers:
+        - name: tick-container
+          image: alpine:3.9
+          command: ["sh", "-c"]
+          args:
+          - |
+            touch /logs/tick.log
+            while :; do
+              date -Iseconds >> /logs/tick.log
+              sleep 1
+            done
+          volumeMounts:
+            - name: log-volume
+              mountPath: /logs
+        - name: fluent-container
+          image: fluent/fluentd:v1.4-1
+          volumeMounts:
+            - name: log-volume
+              mountPath: /logs
+            - name: config-volume
+              mountPath: /fluentd/etc
+      volumes:
+        - name: log-volume
+          emptyDir: {}
+        - name: config-volume
+          configMap:
+            name: fluent-config
