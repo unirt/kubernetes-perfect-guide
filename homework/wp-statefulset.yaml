@@ -41,13 +41,13 @@ spec:
         volumeMounts:
         - name: data-volume
           mountPath: /var/lib/mysql
-      initContainers:
+      initContainers:  # unit container for removing /data/lost+found
       - name: alpine
         image: alpine
-        command: ["rm", "-rf", "/var/lib/mysql/lost+found"]
+        command: ["rm", "-rf", "/data/lost+found"]
         volumeMounts:
         - name: data-volume
-          mountPath: /var/lib/mysql
+          mountPath: /data
   volumeClaimTemplates:
   - metadata:
       name: data-volume
